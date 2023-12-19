@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\JobCollection;
 
 class JobRepository extends Repository
 {
-	protected string $uri = 'jobs';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'jobs';
 
 	protected function createCollection($response): JobCollection
 	{

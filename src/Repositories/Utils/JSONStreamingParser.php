@@ -30,41 +30,80 @@ class JSONStreamingParser
 	const UTF16_BOM = 2;
 	const UTF32_BOM = 3;
 
-	private int $state;
+	/**
+	 * @var int
+	 */
+	private $state;
 
 	/**
 	 * @var int[]
 	 */
-	private array $stack = [];
+	private $stack = [];
 
-	private Stream $stream;
+	/**
+	 * @var Stream
+	 */
+	private $stream;
 
-	private JSONStreamingListener $listener;
+	/**
+	 * @var JSONStreamingListener
+	 */
+	private $listener;
 
-	private bool $emitWhitespace;
+	/**
+	 * @var bool
+	 */
+	private $emitWhitespace;
 
-	private string $buffer = '';
+	/**
+	 * @var string
+	 */
+	private $buffer = '';
 
-	private int $bufferSize;
+	/**
+	 * @var int
+	 */
+	private $bufferSize;
 
 	/**
 	 * @var string[]
 	 */
-	private array $unicodeBuffer = [];
+	private $unicodeBuffer = [];
 
-	private int $unicodeHighSurrogate = -1;
+	/**
+	 * @var int
+	 */
+	private $unicodeHighSurrogate = -1;
 
-	private string $unicodeEscapeBuffer = '';
+	/**
+	 * @var string
+	 */
+	private $unicodeEscapeBuffer = '';
 
-	private string $lineEnding;
+	/**
+	 * @var string
+	 */
+	private $lineEnding;
 
-	private int $lineNumber;
+	/**
+	 * @var int
+	 */
+	private $lineNumber;
 
-	private int $charNumber;
+	/**
+	 * @var int
+	 */
+	private $charNumber;
 
-	private bool $stopParsing = false;
+	/**
+	 * @var bool
+	 */
+	private $stopParsing = false;
 
-	private int $utfBom = 0;
+	/**
+	 * @var int
+	 */
+	private $utfBom = 0;
 
 	/**
 	 * The constructor.

@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\PersistentVolumeClaimCollection;
 
 class PersistentVolumeClaimRepository extends Repository
 {
-	protected string $uri = 'persistentvolumeclaims';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'persistentvolumeclaims';
 
 	protected function createCollection($response): PersistentVolumeClaimCollection
 	{

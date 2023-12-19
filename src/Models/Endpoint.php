@@ -4,6 +4,7 @@ class Endpoint extends Model
 {
 	/**
 	 * Whether or not the kind is plural.
+	 * @var bool
 	 */
-	protected bool $pluralKind = true;
+	protected $pluralKind = true;
 }

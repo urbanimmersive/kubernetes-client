@@ -2,7 +2,10 @@
 
 class Issuer extends Model
 {
-
-    protected string $apiVersion = 'certmanager.k8s.io/v1alpha1';
+	/**
+	 * The api version.
+	 * @var string
+	 */
+    protected $apiVersion = 'certmanager.k8s.io/v1alpha1';
 
 }

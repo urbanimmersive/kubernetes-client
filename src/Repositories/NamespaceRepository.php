@@ -4,8 +4,15 @@ use Maclof\Kubernetes\Collections\NamespaceCollection;
 
 class NamespaceRepository extends Repository
 {
-	protected string $uri = 'namespaces';
-	protected bool $namespace = false;
+	/**
+	 * @var string
+	 */
+	protected $uri = 'namespaces';
+
+	/**
+	 * @var bool
+	 */
+	protected $namespace = false;
 
 	protected function createCollection($response): NamespaceCollection
 	{

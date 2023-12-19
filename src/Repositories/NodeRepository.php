@@ -5,8 +5,15 @@ use Maclof\Kubernetes\Models\Node;
 
 class NodeRepository extends Repository
 {
-	protected string $uri = 'nodes';
-	protected bool $namespace = false;
+	/**
+	 * @var string
+	 */
+	protected $uri = 'nodes';
+
+	/**
+	 * @var bool
+	 */
+	protected $namespace = false;
 
 	protected function createCollection($response): NodeCollection
 	{

@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\DeploymentCollection;
 
 class DeploymentRepository extends Repository
 {
-	protected string $uri = 'deployments';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'deployments';
 
 	protected function createCollection($response): DeploymentCollection
 	{

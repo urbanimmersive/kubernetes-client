@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\ReplicationControllerCollection;
 
 class ReplicationControllerRepository extends Repository
 {
-	protected string $uri = 'replicationcontrollers';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'replicationcontrollers';
 
 	protected function createCollection($response): ReplicationControllerCollection
 	{

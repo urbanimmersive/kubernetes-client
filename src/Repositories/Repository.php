@@ -12,48 +12,57 @@ abstract class Repository
 {
 	/**
 	 * The client.
+	 * @var Client
 	 */
-	protected Client $client;
+	protected $client;
 
 	/**
 	 * The resource uri, has to be overwritten.
+	 * @var string
 	 */
-	protected string $uri = '';
+	protected $uri = '';
 
 	/**
 	 * Include the namespace in the requests.
+	 * @var bool
 	 */
-	protected bool $namespace = true;
+	protected $namespace = true;
 
 	/**
 	 * The api version to use for requests.
+	 * @var string|null
 	 */
-	protected ?string $apiVersion = null;
+	protected $apiVersion = null;
 
 	/**
 	 * The label selector.
+	 * @var array
 	 */
-	protected array $labelSelector = [];
+	protected $labelSelector = [];
 
 	/**
 	 * The label selector options that should not match.
+	 * @var array
 	 */
-	protected array $inequalityLabelSelector = [];
+	protected $inequalityLabelSelector = [];
 
 	/**
 	 * The field selector.
+	 * @var array
 	 */
-	protected array $fieldSelector = [];
+	protected $fieldSelector = [];
 
 	/**
 	 * The field selector options that should not match.
+	 * @var array
 	 */
-	protected array $inequalityFieldSelector = [];
+	protected $inequalityFieldSelector = [];
 
 	/**
 	 * The default class namespace of the repositories
+	 * @var string
 	 */
-	protected string $modelClassNamespace = 'Maclof\Kubernetes\Models\\';
+	protected $modelClassNamespace = 'Maclof\Kubernetes\Models\\';
 
 	/**
 	 * The constructor.
@@ -130,7 +139,7 @@ abstract class Repository
 	public function applyJsonPatch(Model $model, array $patch): array
 	{
 		$patch = json_encode($patch);
-		
+
 		$this->client->setPatchType('json');
 
 		return $this->sendRequest('PATCH', '/' . $this->uri . '/' . $model->getMetadata('name'), [], $patch, $this->namespace);
@@ -308,5 +317,5 @@ abstract class Repository
 	/**
 	 * Create a collection of models from the response.
 	 */
-	abstract protected function createCollection(array $response): Collection;
+	abstract protected function createCollection(array $response);
 }

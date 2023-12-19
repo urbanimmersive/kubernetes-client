@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\IngressCollection;
 
 class IngressRepository extends Repository
 {
-	protected string $uri = 'ingresses';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'ingresses';
 
 	protected function createCollection($response): IngressCollection
 	{

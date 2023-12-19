@@ -7,7 +7,10 @@ class IssuerRepository extends Repository
 {
     use PatchMergeTrait;
 
-    protected string $uri = 'issuers';
+	/**
+	 * @var string
+	 */
+    protected $uri = 'issuers';
 
     protected function createCollection($response): IssuerCollection
     {

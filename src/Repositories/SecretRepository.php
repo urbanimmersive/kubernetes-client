@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\SecretCollection;
 
 class SecretRepository extends Repository
 {
-	protected string $uri = 'secrets';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'secrets';
 
 	protected function createCollection($response): SecretCollection
 	{

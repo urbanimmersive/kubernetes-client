@@ -5,8 +5,9 @@ class RepositoryRegistry implements \ArrayAccess, \Countable
 
     /**
      * Initial registry class map. Contains only package builtin repositories.
+	 * @var array
      */
-    protected array $map = [
+    protected $map = [
         'nodes'                  => Repositories\NodeRepository::class,
         'quotas'                 => Repositories\QuotaRepository::class,
         'pods'                   => Repositories\PodRepository::class,

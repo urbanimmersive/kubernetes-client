@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\EventCollection;
 
 class EventRepository extends Repository
 {
-	protected string $uri = 'events';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'events';
 
 	protected function createCollection($response): EventCollection
 	{

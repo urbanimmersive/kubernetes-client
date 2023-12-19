@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\HorizontalPodAutoscalerCollection;
 
 class HorizontalPodAutoscalerRepository extends Repository
 {
-	protected string $uri = 'horizontalpodautoscalers';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'horizontalpodautoscalers';
 
 	protected function createCollection($response): HorizontalPodAutoscalerCollection
 	{

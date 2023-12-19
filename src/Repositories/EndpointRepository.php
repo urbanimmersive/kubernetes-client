@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\EndpointCollection;
 
 class EndpointRepository extends Repository
 {
-	protected string $uri = 'endpoints';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'endpoints';
 
 	protected function createCollection($response): EndpointCollection
 	{

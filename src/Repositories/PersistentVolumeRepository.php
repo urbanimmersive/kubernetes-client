@@ -5,11 +5,11 @@ use Maclof\Kubernetes\Collections\PersistentVolumeCollection;
 
 class PersistentVolumeRepository extends Repository
 {
-	protected string $uri = 'persistentvolumes';
-
 	/**
-	 * @see \Maclof\Kubernetes\Repositories\Repository::createCollection()
+	 * @var string
 	 */
+	protected $uri = 'persistentvolumes';
+
 	protected function createCollection($response): PersistentVolumeCollection
 	{
 		return new PersistentVolumeCollection($response['items']);

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Support\Arrayable;
 
 abstract class Model implements Arrayable
 {
-	
+
 	public const MODEL_FROM_ARRAY = 'array';
 
 	public const MODEL_FROM_JSON = 'json';
@@ -19,23 +19,27 @@ abstract class Model implements Arrayable
 
 	/**
 	 * The schema.
+	 * @var array
 	 */
-	protected array $schema = [];
+	protected $schema = [];
 
 	/**
 	 * The api version.
+	 * @var string
 	 */
-	protected string $apiVersion = 'v1';
+	protected $apiVersion = 'v1';
 
 	/**
 	 * Whether or not the kind is plural.
+	 * @var bool
 	 */
-	protected bool $pluralKind = false;
+	protected $pluralKind = false;
 
 	/**
 	 * The attributes.
+	 * @var array
 	 */
-	protected array $attributes = [];
+	protected $attributes = [];
 
 	/**
 	 * The constructor.
@@ -88,7 +92,7 @@ abstract class Model implements Arrayable
 	 */
 	public function getMetadata(string $key)
 	{
-		return isset($this->attributes['metadata'][$key]) ? $this->attributes['metadata'][$key] : null;
+		return $this->attributes['metadata'][$key] ?? null;
 	}
 
 	/**
@@ -120,7 +124,7 @@ abstract class Model implements Arrayable
 		}
 
 		$schema = array_merge($this->schema, $this->toArray());
-		
+
 		if(isset($schema[self::MODEL_FROM_YAML])) {
 			$jsonSchema = json_encode($schema[self::MODEL_FROM_YAML], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 		} elseif (isset($schema[self::MODEL_FROM_JSON])) {
@@ -128,7 +132,7 @@ abstract class Model implements Arrayable
 		} else {
 			$jsonSchema = json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 		}
-		
+
 
 		// Fix for issue #37, can't use JSON_FORCE_OBJECT as the encoding breaks arrays of objects, for example port mappings.
 		$jsonSchema = str_replace(': []', ': {}', $jsonSchema);

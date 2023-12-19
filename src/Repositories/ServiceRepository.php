@@ -4,7 +4,10 @@ use Maclof\Kubernetes\Collections\ServiceCollection;
 
 class ServiceRepository extends Repository
 {
-	protected string $uri = 'services';
+	/**
+	 * @var string
+	 */
+	protected $uri = 'services';
 
 	protected function createCollection($response): ServiceCollection
 	{

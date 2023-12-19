@@ -75,43 +75,51 @@ class Client
 {
 	/**
 	 * The api version.
+	 * @var string
 	 */
-	protected string $apiVersion = 'v1';
+	protected $apiVersion = 'v1';
 
 	/**
 	 * The address of the master server.
+	 * @var string|null
 	 */
-	protected ?string $master = null;
+	protected $master = null;
 
 	/**
 	 * The servide account token.
+	 * @var string|null
 	 */
-	protected ?string $token = null;
+	protected $token = null;
 
 	/**
 	 * The username for basic auth.
+	 * @var string|null
 	 */
-	protected ?string $username = null;
+	protected $username = null;
 
 	/**
 	 * The password for basic auth.
+	 * @var string|null
 	 */
-	protected ?string $password = null;
+	protected $password = null;
 
 	/**
 	 * The namespace.
+	 * @var string
 	 */
-	protected string $namespace = 'default';
+	protected $namespace = 'default';
 
 	/**
 	 * The http client.
+	 * @var HttpMethodsClientInterface
 	 */
-	protected HttpMethodsClientInterface $httpClient;
+	protected $httpClient;
 
 	/**
 	 * The exec channels for result messages.
+	 * @var array
 	 */
-	protected array $execChannels = [
+	protected $execChannels = [
 		'stdin',
 		'stdout',
 		'stderr',
@@ -121,26 +129,41 @@ class Client
 
 	/**
 	 * The repository class registry.
+	 * @var RepositoryRegistry
 	 */
-	protected RepositoryRegistry $classRegistry;
+	protected $classRegistry;
 
 	/**
 	 * The class instances.
+	 * @var array
 	 */
-	protected array $classInstances = [];
+	protected $classInstances = [];
 
 	/**
 	 * header for patch.
+	 * @var array
 	 */
-	protected array $patchHeaders = ['Content-Type' => 'application/strategic-merge-patch+json'];
+	protected $patchHeaders = ['Content-Type' => 'application/strategic-merge-patch+json'];
 
-	protected ?bool $verify = null;
+	/**
+	 * @var bool|null
+	 */
+	protected $verify = null;
 
-	protected ?string $caCert = null;
+	/**
+	 * @var string|null
+	 */
+	protected $caCert = null;
 
-	protected ?string $clientCert = null;
+	/**
+	 * @var string|null
+	 */
+	protected $clientCert = null;
 
-	protected ?string $clientKey = null;
+	/**
+	 * @var string|null
+	 */
+	protected $clientKey = null;
 
 	/**
 	 * The constructor.
@@ -189,7 +212,7 @@ class Client
 
 	/**
 	 * Parse a kubeconfig.
-	 * 
+	 *
 	 * @param  string|array $content Mixed type, based on the second input argument
 	 * @throws \InvalidArgumentException
 	 */
@@ -311,7 +334,7 @@ class Client
 
 	/**
 	 * Parse a kubeconfig file.
-	 * 
+	 *
 	 * @throws \InvalidArgumentException
 	 */
 	public static function parseKubeconfigFile(string $filePath): array
@@ -375,7 +398,7 @@ class Client
 		if ($namespace) {
 			$baseUri .= '/namespaces/' . $this->namespace;
 		}
-		
+
 		if ($uri === '/healthz' || $uri === '/version') {
 			$requestUrl = $this->master . '/' . $uri;
 		} else {
@@ -562,7 +585,7 @@ class Client
 	{
 		return $this->sendRequest('GET', '/healthz');
 	}
-	
+
 	/**
 	 * Check the version.
 	 */
@@ -570,7 +593,7 @@ class Client
 	{
 		return $this->sendRequest('GET', '/version');
 	}
-	
+
 	/**
 	 * Magic call method to grab a class instance.
 	 *

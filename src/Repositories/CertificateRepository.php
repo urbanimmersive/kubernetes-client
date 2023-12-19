@@ -7,10 +7,14 @@ class CertificateRepository extends Repository
 {
     use PatchMergeTrait;
 
-    protected string $uri = 'certificates';
+	/**
+	 * @var string
+	 */
+    protected $uri = 'certificates';
+
 
     protected function createCollection($response): CertificateCollection
-    {
+	{
         return new CertificateCollection($response['items']);
     }
 
