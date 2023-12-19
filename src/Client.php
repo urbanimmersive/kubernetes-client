@@ -1,19 +1,23 @@
 <?php namespace Maclof\Kubernetes;
 
 use Exception;
+use Http\Discovery\Psr17FactoryDiscovery;
+use Http\Discovery\Psr18ClientDiscovery;
 use InvalidArgumentException;
 use BadMethodCallException;
 use Maclof\Kubernetes\Exceptions\ApiServerException;
+use Maclof\Kubernetes\Repositories\RoleBindingRepository;
+use Maclof\Kubernetes\Repositories\RoleRepository;
+use Maclof\Kubernetes\Repositories\ServiceAccountRepository;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException as YamlParseException;
 
-use Http\Client\HttpClient;
 use Http\Client\Common\HttpMethodsClient;
+use Http\Client\Common\HttpMethodsClientInterface;
 use Http\Client\Exception\TransferException as HttpTransferException;
 use Http\Message\RequestFactory as HttpRequestFactory;
-use Http\Discovery\HttpClientDiscovery;
-use Http\Discovery\MessageFactoryDiscovery as HttpMessageFactoryDiscovery;
 
 use React\EventLoop\Factory as ReactFactory;
 use React\Socket\Connector as ReactSocketConnector;
@@ -63,64 +67,51 @@ use Maclof\Kubernetes\Repositories\NamespaceRepository;
  * @method HorizontalPodAutoscalerRepository horizontalPodAutoscalers()
  * @method CertificateRepository certificates()
  * @method IssuersRepository issuers()
+ * @method ServiceAccountRepository serviceAccounts()
+ * @method RoleRepository roles()
+ * @method RoleBindingRepository roleBindings()
  */
 class Client
 {
 	/**
 	 * The api version.
-	 *
-	 * @var string
 	 */
-	protected $apiVersion = 'v1';
+	protected string $apiVersion = 'v1';
 
 	/**
 	 * The address of the master server.
-	 *
-	 * @var string|null
 	 */
-	protected $master;
+	protected ?string $master = null;
 
 	/**
 	 * The servide account token.
-	 *
-	 * @var string
 	 */
-	protected $token;
+	protected ?string $token = null;
 
 	/**
 	 * The username for basic auth.
-	 *
-	 * @var string
 	 */
-	protected $username;
+	protected ?string $username = null;
 
 	/**
 	 * The password for basic auth.
-	 *
-	 * @var string
 	 */
-	protected $password;
+	protected ?string $password = null;
 
 	/**
 	 * The namespace.
-	 *
-	 * @var string
 	 */
-	protected $namespace = 'default';
+	protected string $namespace = 'default';
 
 	/**
 	 * The http client.
-	 *
-	 * @var \Http\Client\Common\HttpMethodsClientInterface
 	 */
-	protected $httpClient;
+	protected HttpMethodsClientInterface $httpClient;
 
 	/**
 	 * The exec channels for result messages.
-	 *
-	 * @var array
 	 */
-	protected $execChannels = [
+	protected array $execChannels = [
 		'stdin',
 		'stdout',
 		'stderr',
@@ -130,50 +121,45 @@ class Client
 
 	/**
 	 * The repository class registry.
-	 *
-	 * @var RepositoryRegistry
 	 */
-	protected $classRegistry;
+	protected RepositoryRegistry $classRegistry;
 
 	/**
 	 * The class instances.
-	 *
-	 * @var array
 	 */
-	protected $classInstances = [];
+	protected array $classInstances = [];
 
 	/**
 	 * header for patch.
-	 *
-	 * @var array
 	 */
-	protected $patchHeaders = ['Content-Type' => 'application/strategic-merge-patch+json'];
+	protected array $patchHeaders = ['Content-Type' => 'application/strategic-merge-patch+json'];
+
+	protected ?bool $verify = null;
+
+	protected ?string $caCert = null;
+
+	protected ?string $clientCert = null;
+
+	protected ?string $clientKey = null;
 
 	/**
 	 * The constructor.
-	 *
-	 * @param array $options
-	 * @param \Maclof\Kubernetes\RepositoryRegistry|null $repositoryRegistry
-	 * @param ClientInterface|null $httpClient Some client implementing PSR HTTP ClientInterface
-	 * @param \Http\Message\RequestFactory $httpRequestFactory
 	 */
-	public function __construct(array $options = [], RepositoryRegistry $repositoryRegistry = null, ClientInterface $httpClient = null, HttpRequestFactory $httpRequestFactory = null)
+	public function __construct(array $options = [], RepositoryRegistry $repositoryRegistry = null, ClientInterface $httpClient = null, HttpRequestFactory $httpRequestFactory = null, StreamFactoryInterface $streamFactory = null)
 	{
 		$this->setOptions($options);
 		$this->classRegistry = $repositoryRegistry ?: new RepositoryRegistry();
 		$this->httpClient = new HttpMethodsClient(
-			$httpClient ?: HttpClientDiscovery::find(),
-			$httpRequestFactory ?: HttpMessageFactoryDiscovery::find()
+			$httpClient ?: Psr18ClientDiscovery::find(),
+			$httpRequestFactory ?: Psr17FactoryDiscovery::findRequestFactory(),
+			$streamFactory ?: Psr17FactoryDiscovery::findStreamFactory()
 		);
 	}
 
 	/**
 	 * Set the options.
-	 *
-	 * @param  array $options
-	 * @param  bool  $reset
 	 */
-	public function setOptions(array $options, $reset = false)
+	public function setOptions(array $options, bool $reset = false): void
 	{
 		if ($reset) {
 			$this->master = null;
@@ -205,11 +191,9 @@ class Client
 	 * Parse a kubeconfig.
 	 * 
 	 * @param  string|array $content Mixed type, based on the second input argument
-	 * @param  string $contentType
-	 * @return array
 	 * @throws \InvalidArgumentException
 	 */
-	public static function parseKubeconfig($content, $contentType = 'yaml')
+	public static function parseKubeconfig($content, string $contentType = 'yaml'): array
 	{
 		if ($contentType === 'array') {
 			if (!is_array($content)) {
@@ -328,11 +312,9 @@ class Client
 	/**
 	 * Parse a kubeconfig file.
 	 * 
-	 * @param  string $filePath
-	 * @return array
 	 * @throws \InvalidArgumentException
 	 */
-	public static function parseKubeconfigFile($filePath)
+	public static function parseKubeconfigFile(string $filePath): array
 	{
 		if (!file_exists($filePath)) {
 			throw new InvalidArgumentException('Kubeconfig file does not exist at path: ' . $filePath);
@@ -343,12 +325,8 @@ class Client
 
 	/**
 	 * Get a temp file path for some content.
-	 *
-	 * @param  string $fileName
-	 * @param  string $fileContent
-	 * @return string
 	 */
-	protected static function getTempFilePath($fileName, $fileContent)
+	protected static function getTempFilePath(string $fileName, string $fileContent): string
 	{
 		$fileName = 'kubernetes-client-' . $fileName;
 
@@ -363,20 +341,16 @@ class Client
 
 	/**
 	 * Set namespace.
-	 *
-	 * @param string $namespace
 	 */
-	public function setNamespace($namespace)
+	public function setNamespace(string $namespace): void
 	{
 		$this->namespace = $namespace;
 	}
 
 	/**
 	 * Set patch header
-	 *
-	 * @param string patch type
 	 */
-	public function setPatchType($patchType = "strategic")
+	public function setPatchType(string $patchType = "strategic"): void
 	{
 		if ($patchType === "merge") {
 			$this->patchHeaders = ['Content-Type' => 'application/merge-patch+json'];
@@ -390,17 +364,12 @@ class Client
 	/**
 	 * Send a request.
 	 *
-	 * @param  string  $method
-	 * @param  string  $uri
-	 * @param  array   $query
-	 * @param  mixed   $body
-	 * @param  boolean $namespace
-	 * @param  string  $apiVersion
-	 * @param  array   $requestOptions
+	 * @param  mixed $body
 	 * @return mixed
 	 * @throws \Maclof\Kubernetes\Exceptions\BadRequestException
 	 */
-	public function sendRequest($method, $uri, $query = [], $body = null, $namespace = true, $apiVersion = null, array $requestOptions = [])
+	#[\ReturnTypeWillChange]
+	public function sendRequest(string $method, string $uri, array $query = [], $body = null, bool $namespace = true, string $apiVersion = null, array $requestOptions = [])
 	{
 		$baseUri = $apiVersion ? ('apis/' . $apiVersion) : ('api/' . $this->apiVersion);
 		if ($namespace) {
@@ -419,6 +388,9 @@ class Client
 
 		try {
 			$headers = $method === 'PATCH' ? $this->patchHeaders : [];
+			if ('POST' === $method) {
+				$headers['Content-Type'] = 'application/json';
+			}
 
 			if ($this->token) {
 				$token = $this->token;
@@ -472,23 +444,16 @@ class Client
 
 	/**
 	 * Check if an upgrade request is required.
-	 *
-	 * @param  array $response
-	 * @return boolean
 	 */
-	protected function isUpgradeRequestRequired(array $response)
+	protected function isUpgradeRequestRequired(array $response): bool
 	{
 		return $response['code'] == 400 && $response['status'] === 'Failure' && $response['message'] === 'Upgrade request required';
 	}
 
 	/**
 	 * Send an upgrade request and return any response messages.
-	 *
-	 * @param  string $requestUri
-	 * @param  array  $query
-	 * @return array
 	 */
-	protected function sendUpgradeRequest($requestUri, array $query)
+	protected function sendUpgradeRequest(string $requestUri, array $query): array
 	{
 		$fullUrl = $this->master .'/' . $requestUri . '?' . implode('&', $this->parseQueryParams($query));
 		if (parse_url($fullUrl, PHP_URL_SCHEME) === 'https') {
@@ -568,11 +533,8 @@ class Client
 
 	/**
 	 * Parse an array of query params.
-	 *
-	 * @param  array $query
-	 * @return array
 	 */
-	protected function parseQueryParams(array $query)
+	protected function parseQueryParams(array $query): array
 	{
 		$parts = [];
 
@@ -603,10 +565,8 @@ class Client
 	
 	/**
 	 * Check the version.
-	 *
-	 * @return array
 	 */
-	public function version()
+	public function version(): array
 	{
 		return $this->sendRequest('GET', '/version');
 	}
@@ -614,12 +574,10 @@ class Client
 	/**
 	 * Magic call method to grab a class instance.
 	 *
-	 * @param  string $name
-	 * @param  array  $args
 	 * @return \stdClass
 	 * @throws \BadMethodCallException
 	 */
-	public function __call($name, array $args)
+	public function __call(string $name, array $args)
 	{
 		if (isset($this->classRegistry[$name])) {
 			$class = $this->classRegistry[$name];

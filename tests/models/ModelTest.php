@@ -7,7 +7,7 @@ use TestCase;
 
 class ModelTest extends TestCase
 {
-    public function testGetJsonPath()
+    public function testGetJsonPath(): void
     {
         $expected = 'foo';
 
@@ -20,7 +20,7 @@ class ModelTest extends TestCase
         $this->assertEquals($expected, $actual[0]);
     }
 
-    public function testIsGettingSchema()
+    public function testIsGettingSchema(): void
     {
         $expected = json_encode([
             'kind' => 'ConcreteModel',
@@ -35,7 +35,7 @@ class ModelTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testGetApiVersion()
+    public function testGetApiVersion(): void
     {
         $expected = 'v1';
 
@@ -46,18 +46,24 @@ class ModelTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testGetMetadata()
+    public function testGetMetadata(): void
     {
-        $expected = 'foo';
+		$model = new ConcreteModel(['metadata' => ['name' => 'foo', 'labels' => ['foo' => 'bar']]]);
 
-        $model = new ConcreteModel(['metadata' => ['name' => 'foo']]);
+		$expected = 'foo';
 
-        $actual = $model->getMetadata('name');
+		$actual = $model->getMetadata('name');
 
         $this->assertEquals($expected, $actual);
+
+		$expected = ['foo' => 'bar'];
+
+		$actual = $model->getMetadata('labels');
+
+		$this->assertEquals($expected, $actual);
     }
 
-    public function testIsConvertingToArray()
+    public function testIsConvertingToArray(): void
     {
         $expected = ['foo' => 'bar'];
 
@@ -69,7 +75,7 @@ class ModelTest extends TestCase
 
     }
 
-    public function testIsReturningSchemaOnToStringCall()
+    public function testIsReturningSchemaOnToStringCall(): void
     {
         $model = new ConcreteModel();
 

@@ -8,9 +8,11 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use Psr\Http\Client\ClientInterface;
 
+use function method_exists;
+
 class ClientTest extends TestCase
 {
-	public function testSendRequestJsonParsesResponse()
+	public function testSendRequestJsonParsesResponse(): void
 	{
 		$httpClientProp = new ReflectionProperty(Client::class, 'httpClient');
 		$httpClientProp->setAccessible(true);
@@ -58,7 +60,7 @@ class ClientTest extends TestCase
 		array  $expectedSendArgs,
 		int    $respStatusCode = 200,
 		array  $respHeaders = []
-	) {
+	): void {
 		$httpClientProp = new ReflectionProperty(Client::class, 'httpClient');
 		$httpClientProp->setAccessible(true);
 
@@ -78,7 +80,7 @@ class ClientTest extends TestCase
 		$httpClientProp->setValue($client, $mockHttpMethodsClient);
 	}
 
-	public function testGetPodsFromApi()
+	public function testGetPodsFromApi(): void
 	{
 		$client = new Client();
 
@@ -102,7 +104,7 @@ class ClientTest extends TestCase
 		$this->assertInstanceOf(Pod::class, $pod1);
 	}
 
-	public function providerForFailedResponses()
+	public function providerForFailedResponses(): array
 	{
 		return [
 			[
@@ -126,7 +128,7 @@ class ClientTest extends TestCase
 	/**
 	 * @dataProvider providerForFailedResponses
 	 */
-	public function testExceptionIsThrownOnFailureResponse(int $respCode, string $exceptionClass, string $msgRegEx)
+	public function testExceptionIsThrownOnFailureResponse(int $respCode, string $exceptionClass, string $msgRegEx): void
 	{
 		$client = new Client();
 
@@ -138,7 +140,11 @@ class ClientTest extends TestCase
 		);
 
 		$this->expectException($exceptionClass);
-		$this->expectExceptionMessageRegExp($msgRegEx);
+		if (method_exists($this, 'expectExceptionMessageRegExp')) {
+			$this->expectExceptionMessageRegExp($msgRegEx);
+		} else {
+			$this->expectExceptionMessageMatches($msgRegEx);
+		}
 		$client->sendRequest('GET', '/api/anything');
 	}
 }
