@@ -35,7 +35,5 @@
 			"tests/TestCase.php",
 			"tests/helpers/HttpMethodsMockClient.php"
 		]
-	},
-	"minimum-stability": "dev",
-	"prefer-stable": true
+	}
 }
